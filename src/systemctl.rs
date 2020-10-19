@@ -2,7 +2,6 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::time::SystemTime;
 
-use chrono::NaiveTime;
 use regex::Regex;
 
 use crate::error::CustomError;
@@ -138,7 +137,7 @@ pub fn get_systemctl_info() -> Result<SystemctlInfo> {
         .next()
         .ok_or_else(|| CustomError::new("Failed to read raw uptime"))??;
 
-    let uptime_secs: u64 = uptime_re
+    let uptime_unix_secs: u64 = uptime_re
         .captures(&uptime_raw)
         .and_then(|c| c.get(1))
         .ok_or_else(|| CustomError::new("Failed to read uptime"))
@@ -148,9 +147,14 @@ pub fn get_systemctl_info() -> Result<SystemctlInfo> {
         .duration_since(SystemTime::UNIX_EPOCH)?
         .as_secs();
 
-    let uptime = NaiveTime::from_num_seconds_from_midnight((curr_time - uptime_secs) as u32, 0)
-        .format("%H:%M:%S")
-        .to_string();
+    let uptime_secs = curr_time - uptime_unix_secs;
+
+    let uptime = format!(
+        "{:02}:{:02}:{:02}",
+        uptime_secs / 3600,
+        (uptime_secs / 60) % 60,
+        uptime_secs % 60
+    );
 
     let macos_version = sysctl_cmd_stdout
         .next()
