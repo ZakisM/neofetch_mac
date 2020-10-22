@@ -4,12 +4,14 @@ use colored::{Color, Colorize};
 
 use crate::formatter::format_system_data;
 use crate::ioreg::get_ioreg_info;
+use crate::ipconfig::get_ipconfig;
 use crate::systemctl::get_systemctl_info;
 use crate::whoami::get_who_am_i;
 
 mod error;
 mod formatter;
 mod ioreg;
+mod ipconfig;
 mod systemctl;
 mod whoami;
 
@@ -17,10 +19,11 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 fn main() -> Result<()> {
     let whoami = get_who_am_i()?;
+    let ipconfig = get_ipconfig()?;
     let systemctl_info = get_systemctl_info()?;
     let ioreg_info = get_ioreg_info()?;
 
-    let mut formatted_data = format_system_data(&whoami, &systemctl_info, &ioreg_info);
+    let mut formatted_data = format_system_data(&whoami, &ipconfig, &systemctl_info, &ioreg_info);
 
     let ascii_art = format!(
         "{}{}{}{}{}",

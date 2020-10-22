@@ -1,11 +1,13 @@
 use colored::Colorize;
 
 use crate::ioreg::IoregInfo;
+use crate::ipconfig::IpConfig;
 use crate::systemctl::SystemctlInfo;
 use crate::whoami::WhoAmI;
 
 pub fn format_system_data(
     whoami: &WhoAmI,
+    ipconfig: &IpConfig,
     systemctl_info: &SystemctlInfo,
     ioreg_info: &IoregInfo,
 ) -> Vec<String> {
@@ -69,6 +71,12 @@ pub fn format_system_data(
         "\n{}: {}GB",
         "Memory".bright_yellow().bold(),
         systemctl_info.memory_amount()
+    ));
+
+    result.push_str(&format!(
+        "\n{}: {}",
+        "Local IP Address".bright_yellow().bold(),
+        ipconfig.0
     ));
 
     result.lines().map(|l| l.to_owned()).collect()
